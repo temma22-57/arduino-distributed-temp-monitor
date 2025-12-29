@@ -11,9 +11,19 @@
 
 static unsigned long last_sample_ms = 0;
 
-/* Placeholder temperature source */
+const int sensor_pin = A0;
+
+/* SparkFun Invernters Kit temp sensor code */
 int16_t read_temperature_x100(void) {
-    return 2250;  // 22.50 °C
+	float voltage, degreesC;
+	int16_t degreesC_x100;
+	
+	voltage = analogRead(sensor_pin) * 0.004882814;
+	
+	degreesC = (voltage - 0.5) * 100;
+	degreesC_x100 = (int16_t)(degreesC * 100)
+	
+	return degreesC_x100;
 }
 
 void setup() {
