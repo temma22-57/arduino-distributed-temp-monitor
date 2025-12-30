@@ -4,6 +4,7 @@
  * Purpose:	library for custom protocol
  */ 
 #include "protocol.h"
+#include "config.h"
 #include <Arduino.h>
 
 typedef enum {
@@ -69,22 +70,24 @@ void protocol_process_byte(uint8_t b) {
 void protocol_send(uint8_t cmd, uint8_t *payload, uint8_t len) {
 	uint8_t crc = 0;
 
-	write_fn(SOF);
+	uint8_t sof = SOF;
+	write_fn(&sof, 1);
 
-	write_fn(len + 2); // SRC + CMD + payload
+	uint8_t temp_len = len + 2;
+	write_fn(&temp_len, 1); // SRC + CMD + payload
 	crc ^= (len + 2);
 
-	write_fn(g_config.node_id);
+	write_fn(&(g_config.node_id), 1);
 	crc ^= g_config.node_id;
 
 
-	write_fn(cmd);
+	write_fn(&cmd, 1);
 	crc ^= cmd;
 
 	for (uint8_t i = 0; i < len; i++) {
-		write_fn(payload[i]);
+		write_fn(payload + i, 1);
 		crc ^= payload[i];
 	}
 
-	write_fn(crc);
+	write_fn(&crc, 1);
 }

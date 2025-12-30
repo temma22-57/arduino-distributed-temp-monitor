@@ -21,18 +21,22 @@ int16_t read_temperature_x100(void) {
 	voltage = analogRead(sensor_pin) * 0.004882814;
 	
 	degreesC = (voltage - 0.5) * 100;
-	degreesC_x100 = (int16_t)(degreesC * 100)
+	degreesC_x100 = (int16_t)(degreesC * 100);
 	
 	return degreesC_x100;
 }
 
 void serial_write(const uint8_t *data, size_t len) {
-	Serial.write(data, len);
+	//Serial.write(data, len);
+
+    Serial.print(*data, HEX);
+    Serial.println();
+}
 
 void setup() {
     Serial.begin(115200);
     config_load();
-    protocol_init();
+    protocol_init(serial_write);
 }
 
 void loop() {

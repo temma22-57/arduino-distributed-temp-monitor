@@ -13,6 +13,7 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define SOF 0xAA	// byte code for start-of-frame
@@ -41,7 +42,7 @@ typedef struct {
 	uint8_t payload[MAX_PAYLOAD];
 } Frame;
 
-typedef void *(protocol_write_fn)(const uint8_t *data, size_t len);
+typedef void (*protocol_write_fn)(const uint8_t *data, size_t len);
 
 void protocol_init(protocol_write_fn write_cb);
 void protocol_process_byte(uint8_t);

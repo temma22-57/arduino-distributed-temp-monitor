@@ -1,5 +1,5 @@
 /*
- * File:	config.c
+ * File:	config.cpp
  * Author:	Tristan Emma
  * Purpose:	Library for EEPROM interactions. EEPROM is used
  *		to store configurations settings, in this case
