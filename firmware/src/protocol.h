@@ -41,7 +41,9 @@ typedef struct {
 	uint8_t payload[MAX_PAYLOAD];
 } Frame;
 
-void protocol_init(void);
+typedef void *(protocol_write_fn)(const uint8_t *data, size_t len);
+
+void protocol_init(protocol_write_fn write_cb);
 void protocol_process_byte(uint8_t);
 void protocol_send(uint8_t cmd, uint8_t *payload, uint8_t len);
 
