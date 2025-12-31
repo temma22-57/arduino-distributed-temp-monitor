@@ -62,6 +62,9 @@ void protocol_process_byte(uint8_t b) {
 		case READ_CRC:
 			if (crc == b) {
 				dispatch_frame(&rx);
+			} else {
+				uint8_t err = ERR_BAD_CRC;
+				protocol_send(CMD_ERROR, &err, 1);
 			}
 			state = WAIT_SOF;
 			break;
