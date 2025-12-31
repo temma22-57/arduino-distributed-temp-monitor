@@ -1,7 +1,21 @@
 /*
  * File:	protocol.c
  * Author:	Tristan Emma
- * Purpose:	library for custom protocol
+ * Purpose:	library for custom protocol:
+ * 		intilializing function 
+ * 		protocol parsing state machine
+ * 		protocol sending function
+ * 		
+ * 		Protocol Specification:
+ * 		SOF	LEN	SRC	CMD	PAYLOAD	CRC
+ * 		1B	1B	1B	1B	N bytes	1B
+ * 
+ * 		SOF = 0xAA
+ * 		LEN = 2 + |PAYLOAD|
+ * 		SRC = node_id
+ * 		CMD = MACRO for command
+ * 		PAYLOAD = array of bytes being sent
+ * 		CRC = XOR of all bytes from LEN through PAYLOAD
  */ 
 #include "protocol.h"
 #include "config.h"
@@ -27,7 +41,6 @@ void protocol_init(protocol_write_fn cb) {
 }
 
 void protocol_process_byte(uint8_t b) {
-	Serial.print(b);
 	switch (state) {
 
 		case WAIT_SOF:

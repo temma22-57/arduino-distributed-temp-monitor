@@ -3,11 +3,22 @@
  * Author:	Tristan Emma
  * Purpose:	header file for protocol.c and commands.c
  * 		macro definitions for command byte codes, 
- * 		error byte codes
- * 		typedef for Frame struct of bytes in protocol
+ * 		and error byte codes
+ * 		typedef for Frame struct (for bytes in protocol)
  *
  * 		function prototypes for protocol.c
  * 		function prototype for commands.c
+ *
+ *		Protocol Specification:
+ * 		SOF	LEN	SRC	CMD	PAYLOAD	CRC
+ * 		1B	1B	1B	1B	N bytes	1B
+ * 
+ * 		SOF = 0xAA
+ * 		LEN = 2 + |PAYLOAD|
+ * 		SRC = node_id
+ * 		CMD = MACRO for command
+ * 		PAYLOAD = array of bytes being sent
+ * 		CRC = XOR of all bytes from LEN through PAYLOAD
  */
 
 #ifndef PROTOCOL_H
