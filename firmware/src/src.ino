@@ -6,10 +6,15 @@
  */
 
 #include <Arduino.h>
+
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
+#include <avr/wdt.h>
+
 #include "protocol.h"
 #include "config.h"
+#include "isr_lib.h"
 
-static unsigned long last_sample_ms = 0;
 
 const int sensor_pin = A0;
 
@@ -29,34 +34,39 @@ int16_t read_temperature_x100(void) {
 void serial_write(const uint8_t *data, size_t len) {
 	//Serial.write(data, len);
 
-    Serial.print(*data, HEX);
-    Serial.println();
+	Serial.print(*data, HEX);
+	Serial.println();
 }
 
 void setup() {
-    Serial.begin(115200);
-    config_load();
-    protocol_init(serial_write);
+	Serial.begin(9600);
+	config_load();		     // load config from EEPROM
+	protocol_init(serial_write); 
+
+	watchdog_init();	     // setup interrupts
+	sei();			     // enable global interrupt
 }
 
 void loop() {
-    /* Handle incoming serial bytes */
-    while (Serial.available()) {
-        protocol_process_byte(Serial.read());
-    }
+	if (g_wdt_ticks >= g_config.wdt_target) {
+		g_wdt_ticks = 0;
 
-    /* Periodic temperature reporting */
-    unsigned long now = millis();
-    if (now - last_sample_ms >= g_config.sample_interval_s * 1000UL) {
-        last_sample_ms = now;
+		int16_t temp = read_temperature_x100();
+		uint8_t payload[2] = {
+			(uint8_t)(temp >> 8),
+			(uint8_t)(temp & 0xFF)
+		};
+		protocol_send(CMD_TEMP_REPORT, payload, 2);
+		Serial.flush();
+		
+	}
+	
+	if (Serial.available()) {
+		uint8_t b = Serial.read();
+		last_rx_ms = millis();
+		protocol_process_byte(b);
+	}
 
-        int16_t temp = read_temperature_x100();
-        uint8_t payload[2] = {
-            (uint8_t)(temp >> 8),
-            (uint8_t)(temp & 0xFF)
-        };
-        protocol_send(CMD_TEMP_REPORT, payload, 2);
-    }
-
-    /* Power management hook (sleep comes next) */
+	if(safe_to_sleep()) 
+		enter_sleep();
 }

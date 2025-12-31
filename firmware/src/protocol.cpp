@@ -27,6 +27,7 @@ void protocol_init(protocol_write_fn cb) {
 }
 
 void protocol_process_byte(uint8_t b) {
+	Serial.print(b);
 	switch (state) {
 
 		case WAIT_SOF:
@@ -70,8 +71,8 @@ void protocol_process_byte(uint8_t b) {
 void protocol_send(uint8_t cmd, uint8_t *payload, uint8_t len) {
 	uint8_t crc = 0;
 
-	uint8_t sof = SOF;
-	write_fn(&sof, 1);
+	uint8_t temp_sof = SOF;
+	write_fn(&temp_sof, 1);
 
 	uint8_t temp_len = len + 2;
 	write_fn(&temp_len, 1); // SRC + CMD + payload
@@ -80,8 +81,10 @@ void protocol_send(uint8_t cmd, uint8_t *payload, uint8_t len) {
 	write_fn(&(g_config.node_id), 1);
 	crc ^= g_config.node_id;
 
-
-	write_fn(&cmd, 1);
+	uint8_t temp_cmd = cmd;
+	//Serial.print(temp_cmd);
+	//Serial.print(" ");
+	write_fn(&temp_cmd, 1);
 	crc ^= cmd;
 
 	for (uint8_t i = 0; i < len; i++) {

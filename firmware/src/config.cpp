@@ -16,25 +16,33 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-#define DEFAULT_NODE_ID    1
-#define DEFAULT_INTERVAL  10
+#define DEFAULT_NODE_ID		1
+#define DEFAULT_INTERVAL_S	8
+#define WDT_INTERVAL_S		8
 
-DeviceConfig g_config;
+config_t g_config;
 
-uint8_t config_crc(DeviceConfig *cfg) {
-    uint8_t crc = 0;
-    crc ^= cfg->version;
-    crc ^= cfg->node_id;
-    crc ^= (cfg->sample_interval_s >> 8);
-    crc ^= (cfg->sample_interval_s & 0xFF);
-    return crc;
+uint8_t config_crc(config_t *cfg) {
+	uint8_t crc = 0;
+	crc ^= cfg->version;
+	crc ^= cfg->node_id;
+	crc ^= (cfg->sample_interval_s >> 8);
+	crc ^= (cfg->sample_interval_s & 0xFF);
+	crc ^= (cfg->wdt_target >> 8);
+	crc ^= (cfg->wdt_target & 0xFF);
+	return crc;
+}
+
+uint16_t config_wdt_target(config_t *cfg){
+	return g_config.sample_interval_s / WDT_INTERVAL_S;
 }
 
 static void set_defaults(void) {
-    g_config.version = CONFIG_VERSION;
-    g_config.node_id = DEFAULT_NODE_ID;
-    g_config.sample_interval_s = DEFAULT_INTERVAL;
-    g_config.crc = config_crc(&g_config);
+	g_config.version = CONFIG_VERSION;
+	g_config.node_id = DEFAULT_NODE_ID;
+	g_config.sample_interval_s = DEFAULT_INTERVAL_S;
+	g_config.wdt_target = config_wdt_target(&g_config);
+	g_config.crc = config_crc(&g_config);
 }
 
 void config_load(void) {

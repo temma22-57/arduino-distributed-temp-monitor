@@ -20,7 +20,7 @@
 #define MAX_PAYLOAD 32	// max 32 bytes payload in frame
 
 /* Command Byte Codes */
-#define CMD_PING	 0x01
+#define CMD_PING	 0x70
 #define CMD_GET_INFO	 0x02
 #define CMD_GET_TEMP	 0x10
 #define CMD_SET_INTERVAL 0x20
