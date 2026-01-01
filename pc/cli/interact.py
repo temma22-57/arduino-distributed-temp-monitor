@@ -17,10 +17,15 @@ def repl(transport):
             elif cmd == "temp":
                 transport.write(build_frame(0x00, 0x10))
 
-            elif cmd == "interval":
+            elif cmd == "set_interval":
                 sec = int(line[1])
-                payload = bytes([(sec >> 8) & 0xFF, sec & FF])
+                payload = bytes([(sec >> 8) & 0xFF, sec & 0xFF])
                 transport.write(build_frame(0x00, 0x20, payload))
+
+            elif cmd == "set_id":
+                node_id = int(line[1])
+                payload = bytes([node_id])
+                transport.write(build_frame(0x00, 0x22, payload))
 
             elif cmd == "quit":
                 break
