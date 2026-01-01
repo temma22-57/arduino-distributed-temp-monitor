@@ -5,3 +5,5 @@ pc/.venv/
 __pycache__/
 *.pyc
 *.pyo
+*.py.un~
+*.py~
