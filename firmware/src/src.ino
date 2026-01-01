@@ -32,10 +32,10 @@ int16_t read_temperature_x100(void) {
 }
 
 void serial_write(const uint8_t *data, size_t len) {
-	//Serial.write(data, len);
+	Serial.write(data, len);
 
-	Serial.print(*data, HEX);
-	Serial.println();
+	//Serial.print(*data, HEX);
+	//Serial.println();
 }
 
 void setup() {
