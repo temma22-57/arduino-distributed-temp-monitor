@@ -1,2 +1,7 @@
 # Python virtual environments
 pc/.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo

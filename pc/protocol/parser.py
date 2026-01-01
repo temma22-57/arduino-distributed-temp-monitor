@@ -24,8 +24,8 @@ class ProtocolParser:
             self.state = "BODY"
         
         elif self.state == "BODY":
-            self.bof.append(b)
-            if len(self.bof) == self.length + 1:
+            self.buf.append(b)
+            if len(self.buf) == self.length + 1:
                 self.state = "CRC"
 
         elif self.state == "CRC":
