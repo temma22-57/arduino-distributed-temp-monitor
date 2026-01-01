@@ -10,4 +10,4 @@ Windows based Python GUI aggregates and logs sensor data.
 
 ## Status
 
-Developing Firmware Protocol
+Developing Python CLI
