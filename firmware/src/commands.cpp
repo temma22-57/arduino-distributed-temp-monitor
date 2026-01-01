@@ -11,15 +11,14 @@
 #include "config.h"
 #include <Arduino.h>
 
-#define FIRMWARE_MAJOR 1
-#define FIRMWARE_MINOR 0
+#define FIRMWARE_VERSION 1
 
 extern int16_t read_temperature_x100(void);
 
 static void send_info(void) {
     uint8_t payload[4] = {
-        FIRMWARE_MAJOR,
-        FIRMWARE_MINOR,
+        FIRMWARE_VERSION,
+        CONFIG_VERSION,
         g_config.node_id,
         (uint8_t)g_config.sample_interval_s
     };
@@ -47,7 +46,8 @@ void dispatch_frame(Frame *f) {
         case CMD_SET_INTERVAL:
             g_config.sample_interval_s =
                 (f->payload[0] << 8) | f->payload[1];
-            config_save();
+            g_config.wdt_target = config_wdt_target(&g_config); 
+	        config_save();
             send_info();
             break;
 

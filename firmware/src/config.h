@@ -33,5 +33,5 @@ void config_load(void);
 void config_save(void);
 
 uint8_t config_crc(config_t *cfg);
-
+uint16_t config_wdt_target(config_t *cfg);
 #endif
