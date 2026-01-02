@@ -1,15 +1,16 @@
 /*
  * File:	config.h
  * Author:	Tristan Emma
- * Purpose:	Header file for config.c
- * 		Used as library for EEPROM interaction with
- * 		device configuration
- * 		Contains typedef for DeviceConfig Struct, same
- * 		struct stored in EEPROM
+ * Purpose:	Header file for config.cpp
+ * 		Used as library for EEPROM interaction and
+ * 		device config actions
  *
- * 		extern declaration for global variable g_config
- * 		in config.c
- * 		Funtion prototypes for config.c
+ * 		Contains:
+ * 		-typedef for DeviceConfig struct 
+ * 		 (EEPROM config format)
+ * 		-extern declaration for global variable g_config
+ * 		 (declared in config.cpp)
+ * 		-function prototypes for config.cpp
  */ 
 
 #ifndef CONFIG_H

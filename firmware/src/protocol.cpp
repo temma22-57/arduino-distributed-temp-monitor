@@ -1,5 +1,5 @@
 /*
- * File:	protocol.c
+ * File:	protocol.cpp
  * Author:	Tristan Emma
  * Purpose:	library for custom protocol:
  * 		intilializing function 
@@ -14,13 +14,14 @@
  * 		LEN = 2 + |PAYLOAD|
  * 		SRC = node_id
  * 		CMD = MACRO for command
- * 		PAYLOAD = array of bytes being sent
+ * 		PAYLOAD = array of bytes
  * 		CRC = XOR of all bytes from LEN through PAYLOAD
  */ 
 #include "protocol.h"
 #include "config.h"
 #include <Arduino.h>
 
+/* states of parser */
 typedef enum {
 	WAIT_SOF,
 	READ_LEN,
@@ -28,18 +29,33 @@ typedef enum {
 	READ_CRC
 } ParserState;
 
+/* write_fn set on init for where data being sent */
 static protocol_write_fn write_fn;
 
+/* variable associated with Parser State Machine */
 static ParserState state = WAIT_SOF;
 static Frame rx;
 static uint8_t index = 0;
 static uint8_t crc = 0;
 
+/*
+ * protocol_init(protocol_write_fn cb){
+ * 	initializes state machine 
+ * 	sets write_fn
+ */
 void protocol_init(protocol_write_fn cb) {
 	write_fn = cb;
 	state = WAIT_SOF;
 }
 
+/*
+ * protocol_process_byte(uint8_t b)
+ * 	main Parser state Machine:
+ * 	-determines current action based on state
+ * 	-stores bytes according to protocol in static Frame rx
+ * 	-confirms checksum then dispatches the frame
+ * 	-sends error via write_fn if checksum does not match
+ */
 void protocol_process_byte(uint8_t b) {
 	switch (state) {
 
@@ -84,6 +100,13 @@ void protocol_process_byte(uint8_t b) {
 	}
 }
 
+/*
+ * protocol_send(uint8_t cmd, uing8_t *payload, uint8_t len)
+ * 	takes cmd id, array of bytes as payload, and the length of
+ * 	that array
+ * 	uses write_fn to send bytes as specified by protocol
+ * 	builds checksum and sends as final byte
+ */
 void protocol_send(uint8_t cmd, uint8_t *payload, uint8_t len) {
 	uint8_t crc = 0;
 
