@@ -52,7 +52,9 @@
 #define CMD_ERROR	 0xFF
 
 /* Success Byte Codes*/
+#define SUCCESS_PING 0xBB
 #define SUCCESS_ESP_SETUP 0xC0
+#define SUCCESS_ESP_ADD_HOST 0xC2
 #define SUCCESS_ESP_ADD_NODE 0xC3
 #define SUCCESS_ESP_SEND 0xC4
 
@@ -61,7 +63,7 @@
 #define ERR_BAD_CRC	 0x02
 #define ERR_BAD_LENGTH	 0x03
 
-#define ERR_ESP_INIT 0x10
+#define ERR_ESP_SETUP 0x10
 #define ERR_ESP_ADD_HOST 0x12
 #define ERR_ESP_ADD_NODE 0x13
 #define ERR_ESP_NOT_SENT 0x14

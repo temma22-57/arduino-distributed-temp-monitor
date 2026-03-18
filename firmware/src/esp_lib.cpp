@@ -30,6 +30,9 @@ void esp_now_setup_node(uint8_t *host_mac){
   esp_now_register_recv_cb(onDataRecvNode);
   esp_now_register_send_cb(onDataSentNode);
   
+  uint8_t code = SUCCESS_ESP_SETUP;
+  protocol_send(CMD_SUCCESS, &code, 1);
+
   esp_now_set_broadcastAddress(host_mac);
 
   esp_now_peer_info_t host;
@@ -39,8 +42,11 @@ void esp_now_setup_node(uint8_t *host_mac){
 
   esp_err_t add_host_err = esp_now_add_peer(&host);
   if(esp_err_t == ESP_OK){
-    protocol_set_esp(esp_now_write);
     //send positive feedback
+    unint8_t code = SUCCESS_ESP_ADD_HOST;
+    protocol_send(CMD_SUCCESS, &code, 1);
+
+    protocol_set_esp(esp_now_write);
   } else {
     uint8_t err = ERR_ESP_ADD_HOST;
 		protocol_send(CMD_ERROR, &err, 1);//serial error handling here
@@ -55,6 +61,9 @@ void esp_now_setup_host(){
 
   esp_now_register_recv_cb(onDataRecvHost);
   esp_now_register_send_cb(onDataSentHost);
+
+  uint8_t code = SUCCESS_ESP_SETUP;
+  protocol_send(CMD_SUCCESS, &code, 1);
 }
 
 void add_node_to_host(uint8_t *mac){ 
@@ -65,7 +74,8 @@ void add_node_to_host(uint8_t *mac){
 
   esp_err_t add_host_err = esp_now_add_peer(&new_peer);
   if(esp_err_t == ESP_OK){
-    //send positive feedback
+    uint8_t code = SUCCESS_ESP_SADD_NODE;
+    protocol_send(CMD_SUCCESS, &code, 1);//send positive feedback
   } else {
     uint8_t err = ERR_ESP_ADD_NODE;
 		protocol_send(CMD_ERROR, &err, 1);//serial error handling here
@@ -90,7 +100,7 @@ void onDataRecvNode(const uint8_t *mac, const uint8_t *incomingData, int len){
   for(uint8_t i = 0; i < 6; i++){
     if(mac[i] != broadcastAddress[i]){
       uint8_t err = ERR_ESP_BAD_SENDER;
-		  protocol_send(CMD_ERROR, &err, 1);//serial error handling here
+		  protocol_send(CMD_ERROR, &err, 1);//error handling here
       bad_sender = true;
     }
   }
@@ -105,11 +115,14 @@ void onDataSentHost(const uint8_t *mac, esp_now_send_status_t status){
   if(status != ESP_NOW_SEND_SUCCESS){
     uint8_t err = ERR_ESP_NOT_SENT;
 		protocol_send(CMD_ERROR, &err, 1);//send serial error
+  } else {
+    uint8_t code = SUCCESS_ESP_SEND;
+    protocol_send(CMD_SUCCESS, &code, 1);
   }
 }
 
 void onDataSentNode(const uint8_t *mac, esp_now_send_status_t status){
   if(status != ESP_NOW_SEND_SUCCESS){
-    //send error
+    ;//send error
   }
 }

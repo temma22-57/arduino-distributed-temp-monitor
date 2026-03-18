@@ -73,6 +73,10 @@ void dispatch_frame(Frame *f) {
 	switch (f->cmd) {
 
 		case CMD_PING:
+			uint8_t code = SUCCESS_PING;
+			protocol_send(CMD_SUCCESS, &code, 1);
+			break;
+		
 		case CMD_GET_INFO:
 			send_info();
 			break;
@@ -122,17 +126,9 @@ void dispatch_frame(Frame *f) {
 			break;
 		
 		case CMD_TEMP_REPORT:
-			protocol_send_report(f);
-			break;
-		
 		case CMD_INFO_REPORT:
-			protocol_send_report(f);
-			break;
-		
 		case CMD_MAC_REPORT:
-			protocol_send_report(f);
-			break;
-		
+		case CMD_SUCCESS:
 		case CMD_ERROR:
 			protocol_send_report(f);
 			break;
