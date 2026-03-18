@@ -23,7 +23,8 @@ void esp_now_set_broadcastAddress(uint8_t *mac){
 
 void esp_now_setup_node(uint8_t *host_mac){
   if(esp_now_init() != ESP_OK){
-    //send serial error
+    uint8_t err = ERR_ESP_INIT;
+		protocol_send(CMD_ERROR, &err, 1);//send serial error
   }
 
   esp_now_register_recv_cb(onDataRecvNode);
@@ -41,13 +42,15 @@ void esp_now_setup_node(uint8_t *host_mac){
     protocol_set_esp(esp_now_write);
     //send positive feedback
   } else {
-    //serial error handling here
+    uint8_t err = ERR_ESP_ADD_HOST;
+		protocol_send(CMD_ERROR, &err, 1);//serial error handling here
   }
 }
 
 void esp_now_setup_host(){
   if(esp_now_init() != ESP_OK){
-    //send serial error
+    uint8_t err = ERR_ESP_INIT;
+		protocol_send(CMD_ERROR, &err, 1);//send serial error
   }
 
   esp_now_register_recv_cb(onDataRecvHost);
@@ -64,7 +67,8 @@ void add_node_to_host(uint8_t *mac){
   if(esp_err_t == ESP_OK){
     //send positive feedback
   } else {
-    //serial error handling here
+    uint8_t err = ERR_ESP_ADD_NODE;
+		protocol_send(CMD_ERROR, &err, 1);//serial error handling here
   }
 }
 
@@ -76,7 +80,8 @@ void onDataRecvHost(const uint8_t *mac, const uint8_t *incomingData, int len){
       protocol_process_byte(incomingData[i]);
     }
   } else {
-    //error bad sender
+    uint8_t err = ERR_ESP_BAD_SENDER;
+		protocol_send(CMD_ERROR, &err, 1);//error bad sender
   }
 }
 
@@ -84,7 +89,8 @@ void onDataRecvNode(const uint8_t *mac, const uint8_t *incomingData, int len){
   bool bad_sender = false;
   for(uint8_t i = 0; i < 6; i++){
     if(mac[i] != broadcastAddress[i]){
-      //bad recipient error
+      uint8_t err = ERR_ESP_BAD_SENDER;
+		  protocol_send(CMD_ERROR, &err, 1);//serial error handling here
       bad_sender = true;
     }
   }
@@ -97,7 +103,8 @@ void onDataRecvNode(const uint8_t *mac, const uint8_t *incomingData, int len){
 
 void onDataSentHost(const uint8_t *mac, esp_now_send_status_t status){
   if(status != ESP_NOW_SEND_SUCCESS){
-    //send serial error
+    uint8_t err = ERR_ESP_NOT_SENT;
+		protocol_send(CMD_ERROR, &err, 1);//send serial error
   }
 }
 

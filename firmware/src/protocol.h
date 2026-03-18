@@ -47,12 +47,26 @@
 #define CMD_TEMP_REPORT	 0x80
 #define CMD_INFO_REPORT	 0x81
 #define CMD_MAC_REPORT   0x85
+
+#define CMD_SUCCESS 0xF1
 #define CMD_ERROR	 0xFF
+
+/* Success Byte Codes*/
+#define SUCCESS_ESP_SETUP 0xC0
+#define SUCCESS_ESP_ADD_NODE 0xC3
+#define SUCCESS_ESP_SEND 0xC4
 
 /* Error Byte Codes */
 #define ERR_UNKNOWN_CMD	 0x01
 #define ERR_BAD_CRC	 0x02
 #define ERR_BAD_LENGTH	 0x03
+
+#define ERR_ESP_INIT 0x10
+#define ERR_ESP_ADD_HOST 0x12
+#define ERR_ESP_ADD_NODE 0x13
+#define ERR_ESP_NOT_SENT 0x14
+#define ERR_BAD_SENDER 0x15
+
 
 typedef struct {
 	uint8_t len;
