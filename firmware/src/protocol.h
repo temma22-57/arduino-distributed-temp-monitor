@@ -17,7 +17,7 @@
  * 		LEN = 2 + |PAYLOAD|
  * 		SRC = node_id
  * 		CMD = MACRO for command
- * 		PAYLOAD = array of bytes being sent
+ * 		PAYLOAD = array of bytes being sent  MAX 32 BYTES
  * 		CRC = XOR of all bytes from LEN through PAYLOAD
  */
 
@@ -34,11 +34,19 @@
 #define CMD_PING	 0x01
 #define CMD_GET_INFO	 0x02
 #define CMD_GET_TEMP	 0x10
+#define CMD_GET_MAC    0x15
+
 #define CMD_SET_INTERVAL 0x20
 #define CMD_SET_NODE_ID	 0x22
 
+#define CMD_SETUP_ESP_AS_NODE  0x30
+#define CMD_SETUP_ESP_AS_HOST  0x31
+#define CMD_ADD_NODE_TO_HOST 0x33
+#define CMD_SEND_TO_NODE  0x35
+
 #define CMD_TEMP_REPORT	 0x80
 #define CMD_INFO_REPORT	 0x81
+#define CMD_MAC_REPORT   0x85
 #define CMD_ERROR	 0xFF
 
 /* Error Byte Codes */
@@ -57,6 +65,7 @@ typedef struct {
 typedef void (*protocol_write_fn)(const uint8_t *data, size_t len);
 
 void protocol_init(protocol_write_fn write_cb);
+void protocol_set_esp(protocol_write_fn write_cb);
 void protocol_process_byte(uint8_t);
 void protocol_send(uint8_t cmd, uint8_t *payload, uint8_t len);
 

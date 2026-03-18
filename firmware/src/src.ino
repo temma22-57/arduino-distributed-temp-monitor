@@ -49,6 +49,7 @@ void serial_write(const uint8_t *data, size_t len) {
 
 void setup() {
 	Serial.begin(9600);
+	WiFi.mode(WIFI_STA);
 	config_load();		     // load config from EEPROM
 	protocol_init(serial_write); 
 

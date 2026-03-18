@@ -10,6 +10,7 @@
 
 #include "protocol.h"
 #include "config.h"
+#include "esp_lib.h"
 #include <Arduino.h>
 
 #define FIRMWARE_VERSION 1
@@ -49,6 +50,18 @@ static void send_temp(void){
 	protocol_send(CMD_TEMP_REPORT, payload, 2);
 }
 
+static void send_mac(){
+	uint8_t mac[6];
+	WiFi.macAddress(mac);
+
+	protocol_send(CMD_MAC_REPORT, mac, 6);
+}
+
+static void send_cmd_to_node(Frame *f){
+	esp_now_set_broadcastAddress(f->payload);
+	esp_now_write((f->payload + 6), (f->len - 2 - 6));
+}
+
 /*
  * dispatch_frame(Frame *f)
  * 	Dispatches the frame built out by the protocol parser
@@ -67,7 +80,11 @@ void dispatch_frame(Frame *f) {
 		case CMD_GET_TEMP:
 			send_temp();
 			break;
-
+		
+		case CMD_GET_MAC:
+			send_mac();
+			break;
+		
 		case CMD_SET_INTERVAL:
 			// combine payload to single int16_t 
 			g_config.sample_interval_s =
@@ -88,6 +105,38 @@ void dispatch_frame(Frame *f) {
 			send_info();
 			break;
 
+		case CMD_SETUP_ESP_AS_NODE:
+			esp_now_setup_node(f->payload);
+			break;
+		
+		case CMD_SETUP_ESP_AS_HOST:
+			esp_now_setup_host();
+			break;
+		
+		case CMD_ADD_NODE_TO_HOST:
+			esp_now_setup_node(f->payload);
+			break;
+
+		case CMD_SEND_TO_NODE:
+			send_cmd_to_node();
+			break;
+		
+		case CMD_TEMP_REPORT:
+			protocol_send_report(f);
+			break;
+		
+		case CMD_INFO_REPORT:
+			protocol_send_report(f);
+			break;
+		
+		case CMD_MAC_REPORT:
+			protocol_send_report(f);
+			break;
+		
+		case CMD_ERROR:
+			protocol_send_report(f);
+			break;
+		
 		default: {
 			uint8_t err = ERR_UNKNOWN_CMD;
 			protocol_send(CMD_ERROR, &err, 1);
