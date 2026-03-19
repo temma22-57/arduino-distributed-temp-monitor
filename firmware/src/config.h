@@ -18,13 +18,13 @@
 
 #include <stdint.h>
 
-#define CONFIG_VERSION 2
+#define CONFIG_VERSION 3
 
 typedef struct {
     uint8_t version;
     uint8_t node_id;
     uint16_t sample_interval_s;
-    uint16_t wdt_target;
+    uint8_t mac[6];
     uint8_t crc;
 } config_t;
 

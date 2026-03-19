@@ -94,10 +94,7 @@ void dispatch_frame(Frame *f) {
 		case CMD_SET_INTERVAL: {
 			// combine payload to single int16_t 
 			g_config.sample_interval_s =
-				(f->payload[0] << 8) | f->payload[1];
-
-			// recalculate target tick goal 
-			g_config.wdt_target = config_wdt_target(&g_config); 
+				(f->payload[0] << 8) | f->payload[1]; 
 			
 			// save new config to EEPROM and send_info
 			// back to PC

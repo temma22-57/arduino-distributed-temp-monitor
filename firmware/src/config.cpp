@@ -15,14 +15,12 @@
 
 #include "config.h"
 #include <Arduino.h>
+#include <WiFi.h>
 #include <EEPROM.h>
 
 // default device configuration
 #define DEFAULT_NODE_ID		1
 #define DEFAULT_INTERVAL_S	8
-
-// watchdog setting used (8s timeout)
-#define WDT_INTERVAL_S		8
 
 config_t g_config;
 
@@ -39,22 +37,13 @@ uint8_t config_crc(config_t *cfg) {
 	crc ^= cfg->node_id;
 	crc ^= (cfg->sample_interval_s >> 8);
 	crc ^= (cfg->sample_interval_s & 0xFF);
-	crc ^= (cfg->wdt_target >> 8);
-	crc ^= (cfg->wdt_target & 0xFF);
+	for(int i = 0; i < 6; i++){
+		crc ^= (cfg->mac[i]);
+	}
 	return crc;
 }
 
-/*
- * uint16_t confi_wdt_target(config_t *cfg)
- * 	Calculates target tick count between temperature reports
- * 	based on the watchdog interval, and the interval in the
- * 	config
- *
- * 	returns uint16_t target tick count
- */
-uint16_t config_wdt_target(config_t *cfg){
-	return g_config.sample_interval_s / WDT_INTERVAL_S;
-}
+
 
 
 /*
@@ -69,7 +58,7 @@ static void set_defaults(void) {
 	g_config.version = CONFIG_VERSION;
 	g_config.node_id = DEFAULT_NODE_ID;
 	g_config.sample_interval_s = DEFAULT_INTERVAL_S;
-	g_config.wdt_target = config_wdt_target(&g_config);
+	WiFi.macAddress(g_config.mac);
 	g_config.crc = config_crc(&g_config);
 }
 
