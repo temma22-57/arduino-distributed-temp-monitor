@@ -63,11 +63,11 @@
 #define ERR_BAD_CRC	 0x02
 #define ERR_BAD_LENGTH	 0x03
 
-#define ERR_ESP_SETUP 0x10
+#define ERR_ESP_INIT 0x10
 #define ERR_ESP_ADD_HOST 0x12
 #define ERR_ESP_ADD_NODE 0x13
 #define ERR_ESP_NOT_SENT 0x14
-#define ERR_BAD_SENDER 0x15
+#define ERR_ESP_BAD_SENDER 0x15
 
 
 typedef struct {
@@ -84,6 +84,7 @@ void protocol_init(protocol_write_fn write_cb);
 void protocol_set_esp(protocol_write_fn write_cb);
 void protocol_process_byte(uint8_t);
 void protocol_send(uint8_t cmd, uint8_t *payload, uint8_t len);
+void protocol_send_report(Frame *f);
 
 void dispatch_frame(Frame *f);
 

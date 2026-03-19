@@ -13,14 +13,11 @@
  */
 
 #include <Arduino.h>
-
-#include <avr/interrupt.h>
-#include <avr/sleep.h>
-#include <avr/wdt.h>
+#include <WiFi.h>
+#include <esp_now.h>
 
 #include "protocol.h"
 #include "config.h"
-#include "isr_lib.h"
 #include "esp_lib.h"
 
 
@@ -53,34 +50,28 @@ void setup() {
 	WiFi.mode(WIFI_STA);
 	config_load();		     // load config from EEPROM
 	protocol_init(serial_write); 
-
-	watchdog_init();	     // setup interrupts
-	sei();			     // enable global interrupt
 }
 
 void loop() {
 	// check tick count for temperature report
-	if (g_wdt_ticks >= g_config.wdt_target) {
-		g_wdt_ticks = 0;
-
-		int16_t temp = read_temperature_x100();
-		uint8_t payload[2] = {
-			(uint8_t)(temp >> 8),
-			(uint8_t)(temp & 0xFF)
-		};
-		protocol_send(CMD_TEMP_REPORT, payload, 2);
-		Serial.flush(); // ensure all bytes sent before sleep
-		
-	}
+	//if (g_wdt_ticks >= g_config.wdt_target) {
+	//	g_wdt_ticks = 0;
+//
+//		int16_t temp = read_temperature_x100();
+//		uint8_t payload[2] = {
+//			(uint8_t)(temp >> 8),
+//			(uint8_t)(temp & 0xFF)
+//		};
+//		protocol_send(CMD_TEMP_REPORT, payload, 2);
+//		Serial.flush(); // ensure all bytes sent before sleep
+//		
+//	}
 	
 	// check serial for new commands
 	if (Serial.available()) {
 		uint8_t b = Serial.read();
-		last_rx_ms = millis();
+		//last_rx_ms = millis();
 		protocol_process_byte(b);
 	}
 
-	// if safe, sleep until timeout or Serial interrupt
-	if(safe_to_sleep()) 
-		enter_sleep();
 }

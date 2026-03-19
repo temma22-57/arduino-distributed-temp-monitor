@@ -21,71 +21,10 @@ void esp_now_set_broadcastAddress(uint8_t *mac){
   }
 }
 
-void esp_now_setup_node(uint8_t *host_mac){
-  if(esp_now_init() != ESP_OK){
-    uint8_t err = ERR_ESP_INIT;
-		protocol_send(CMD_ERROR, &err, 1);//send serial error
-  }
-
-  esp_now_register_recv_cb(onDataRecvNode);
-  esp_now_register_send_cb(onDataSentNode);
-  
-  uint8_t code = SUCCESS_ESP_SETUP;
-  protocol_send(CMD_SUCCESS, &code, 1);
-
-  esp_now_set_broadcastAddress(host_mac);
-
-  esp_now_peer_info_t host;
-  memcpy(host.peer_addr, host_mac, 6);
-  host.channel = 0;
-  host.encrypt = false;
-
-  esp_err_t add_host_err = esp_now_add_peer(&host);
-  if(esp_err_t == ESP_OK){
-    //send positive feedback
-    unint8_t code = SUCCESS_ESP_ADD_HOST;
-    protocol_send(CMD_SUCCESS, &code, 1);
-
-    protocol_set_esp(esp_now_write);
-  } else {
-    uint8_t err = ERR_ESP_ADD_HOST;
-		protocol_send(CMD_ERROR, &err, 1);//serial error handling here
-  }
-}
-
-void esp_now_setup_host(){
-  if(esp_now_init() != ESP_OK){
-    uint8_t err = ERR_ESP_INIT;
-		protocol_send(CMD_ERROR, &err, 1);//send serial error
-  }
-
-  esp_now_register_recv_cb(onDataRecvHost);
-  esp_now_register_send_cb(onDataSentHost);
-
-  uint8_t code = SUCCESS_ESP_SETUP;
-  protocol_send(CMD_SUCCESS, &code, 1);
-}
-
-void add_node_to_host(uint8_t *mac){ 
-  esp_now_peer_info_t new_peer;
-  memcpy(new_peer.peer_addr, mac, 6);
-  new_peer.channel = 0;
-  new_peer.encrypt = false;
-
-  esp_err_t add_host_err = esp_now_add_peer(&new_peer);
-  if(esp_err_t == ESP_OK){
-    uint8_t code = SUCCESS_ESP_SADD_NODE;
-    protocol_send(CMD_SUCCESS, &code, 1);//send positive feedback
-  } else {
-    uint8_t err = ERR_ESP_ADD_NODE;
-		protocol_send(CMD_ERROR, &err, 1);//serial error handling here
-  }
-}
-
 void onDataRecvHost(const uint8_t *mac, const uint8_t *incomingData, int len){
   // might need to parse out first 6 from *mac, technically not accurate desciription here
   // see docs.expressif.com
-  if(esp_now_is_peer_exists(mac)){
+  if(esp_now_is_peer_exist(mac)){
     for(uint8_t i = 0; i < len; i++){
       protocol_process_byte(incomingData[i]);
     }
@@ -124,5 +63,66 @@ void onDataSentHost(const uint8_t *mac, esp_now_send_status_t status){
 void onDataSentNode(const uint8_t *mac, esp_now_send_status_t status){
   if(status != ESP_NOW_SEND_SUCCESS){
     ;//send error
+  }
+}
+
+void esp_now_setup_node(uint8_t *host_mac){
+  if(esp_now_init() != ESP_OK){
+    uint8_t err = ERR_ESP_INIT;
+		protocol_send(CMD_ERROR, &err, 1);//send serial error
+  }
+
+  esp_now_register_recv_cb(onDataRecvNode);
+  esp_now_register_send_cb(onDataSentNode);
+  
+  uint8_t code = SUCCESS_ESP_SETUP;
+  protocol_send(CMD_SUCCESS, &code, 1);
+
+  esp_now_set_broadcastAddress(host_mac);
+
+  esp_now_peer_info_t host;
+  memcpy(host.peer_addr, host_mac, 6);
+  host.channel = 0;
+  host.encrypt = false;
+
+  esp_err_t add_host_err = esp_now_add_peer(&host);
+  if(add_host_err == ESP_OK){
+    //send positive feedback
+    uint8_t code = SUCCESS_ESP_ADD_HOST;
+    protocol_send(CMD_SUCCESS, &code, 1);
+
+    protocol_set_esp(esp_now_write);
+  } else {
+    uint8_t err = ERR_ESP_ADD_HOST;
+		protocol_send(CMD_ERROR, &err, 1);//serial error handling here
+  }
+}
+
+void esp_now_setup_host(){
+  if(esp_now_init() != ESP_OK){
+    uint8_t err = ERR_ESP_INIT;
+		protocol_send(CMD_ERROR, &err, 1);//send serial error
+  }
+
+  esp_now_register_recv_cb(onDataRecvHost);
+  esp_now_register_send_cb(onDataSentHost);
+
+  uint8_t code = SUCCESS_ESP_SETUP;
+  protocol_send(CMD_SUCCESS, &code, 1);
+}
+
+void add_node_to_host(uint8_t *mac){ 
+  esp_now_peer_info_t new_peer;
+  memcpy(new_peer.peer_addr, mac, 6);
+  new_peer.channel = 0;
+  new_peer.encrypt = false;
+
+  esp_err_t add_host_err = esp_now_add_peer(&new_peer);
+  if(add_host_err == ESP_OK){
+    uint8_t code = SUCCESS_ESP_ADD_NODE;
+    protocol_send(CMD_SUCCESS, &code, 1);//send positive feedback
+  } else {
+    uint8_t err = ERR_ESP_ADD_NODE;
+		protocol_send(CMD_ERROR, &err, 1);//serial error handling here
   }
 }

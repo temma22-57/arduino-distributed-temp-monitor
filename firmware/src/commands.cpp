@@ -8,12 +8,14 @@
  *		payload and call protocol_send().
  */
 
+#include <Arduino.h>
+#include <WiFi.h>
+
 #include "protocol.h"
 #include "config.h"
 #include "esp_lib.h"
-#include <Arduino.h>
 
-#define FIRMWARE_VERSION 1
+#define FIRMWARE_VERSION 2
 
 extern int16_t read_temperature_x100(void);
 
@@ -72,24 +74,24 @@ static void send_cmd_to_node(Frame *f){
 void dispatch_frame(Frame *f) {
 	switch (f->cmd) {
 
-		case CMD_PING:
+		case CMD_PING: {
 			uint8_t code = SUCCESS_PING;
 			protocol_send(CMD_SUCCESS, &code, 1);
 			break;
-		
-		case CMD_GET_INFO:
+		}
+		case CMD_GET_INFO: {
 			send_info();
 			break;
-
-		case CMD_GET_TEMP:
+		}
+		case CMD_GET_TEMP: {
 			send_temp();
 			break;
-		
-		case CMD_GET_MAC:
+		}
+		case CMD_GET_MAC: {
 			send_mac();
 			break;
-		
-		case CMD_SET_INTERVAL:
+		}
+		case CMD_SET_INTERVAL: {
 			// combine payload to single int16_t 
 			g_config.sample_interval_s =
 				(f->payload[0] << 8) | f->payload[1];
@@ -102,37 +104,37 @@ void dispatch_frame(Frame *f) {
 			config_save();
 			send_info();
 			break;
-
-		case CMD_SET_NODE_ID:
+		}
+		case CMD_SET_NODE_ID: {
 			g_config.node_id = f->payload[0];
 			config_save();
 			send_info();
 			break;
-
-		case CMD_SETUP_ESP_AS_NODE:
+		}
+		case CMD_SETUP_ESP_AS_NODE: {
 			esp_now_setup_node(f->payload);
 			break;
-		
-		case CMD_SETUP_ESP_AS_HOST:
+		}
+		case CMD_SETUP_ESP_AS_HOST: {
 			esp_now_setup_host();
 			break;
-		
-		case CMD_ADD_NODE_TO_HOST:
+		}
+		case CMD_ADD_NODE_TO_HOST: {
 			esp_now_setup_node(f->payload);
 			break;
-
-		case CMD_SEND_TO_NODE:
-			send_cmd_to_node();
+		}
+		case CMD_SEND_TO_NODE: {
+			send_cmd_to_node(f);
 			break;
-		
+		}
 		case CMD_TEMP_REPORT:
 		case CMD_INFO_REPORT:
 		case CMD_MAC_REPORT:
 		case CMD_SUCCESS:
-		case CMD_ERROR:
+		case CMD_ERROR: {
 			protocol_send_report(f);
 			break;
-		
+		}
 		default: {
 			uint8_t err = ERR_UNKNOWN_CMD;
 			protocol_send(CMD_ERROR, &err, 1);

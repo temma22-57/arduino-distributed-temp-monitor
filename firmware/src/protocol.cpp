@@ -35,7 +35,7 @@ static protocol_write_fn write_fn;
 /* variable associated with Parser State Machine */
 static ParserState state = WAIT_SOF;
 static Frame rx;
-static uint8_t index = 0;
+static uint8_t rx_index = 0;
 static uint8_t crc = 0;
 
 /*
@@ -64,36 +64,36 @@ void protocol_set_esp(protocol_write_fn cb){
 void protocol_process_byte(uint8_t b) {
 	switch (state) {
 
-		case WAIT_SOF:
+		case WAIT_SOF: {
 			if (b == SOF) {
 				state = READ_LEN;
 				crc = 0;
 			}
 			break;
-
-		case READ_LEN:
+		}
+		case READ_LEN: {
 			rx.len = b;
 			crc ^= b;
-			index = 0;
+			rx_index = 0;
 			state = READ_BODY;
 			break;
-
-		case READ_BODY:
-			if (index == 0)
+		}
+		case READ_BODY:{
+			if (rx_index == 0)
 				rx.src = b;
-			else if (index == 1)
+			else if (rx_index == 1)
 				rx.cmd = b;
 			else
-				rx.payload[index - 2] = b;
+				rx.payload[rx_index - 2] = b;
 
 			crc ^= b;
-			index++;
+			rx_index++;
 
-			if (index >= rx.len)
+			if (rx_index >= rx.len)
 				state = READ_CRC;
 			break;
-
-		case READ_CRC:
+		}
+		case READ_CRC: {
 			if (crc == b) {
 				dispatch_frame(&rx);
 			} else {
@@ -102,6 +102,7 @@ void protocol_process_byte(uint8_t b) {
 			}
 			state = WAIT_SOF;
 			break;
+		}
 	}
 }
 
@@ -137,7 +138,7 @@ void protocol_send(uint8_t cmd, uint8_t *payload, uint8_t len) {
 	}
 
 	frame_bytes[j] = crc;
-	write_fn(&frame_bytes, len + 5);
+	write_fn(frame_bytes, len + 5);
 }
 
 void protocol_send_report(Frame *f){
@@ -158,12 +159,12 @@ void protocol_send_report(Frame *f){
 	crc ^= f->cmd;
 
 	uint8_t j = 4;
-	for (uint8_t i = 0; i < len; i++) {
+	for (uint8_t i = 0; i < f->len - 2; i++) {
 		frame_bytes[j] = (f->payload)[i];
 		crc ^= (f->payload)[i];
 		j++;
 	}
 
 	frame_bytes[j] = crc;
-	write_fn(&frame_bytes, len + 5);
+	write_fn(frame_bytes, f->len + 5);
 }
