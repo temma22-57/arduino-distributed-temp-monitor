@@ -5,10 +5,12 @@ from serial_link.transport import SerialTransport
 from serial_link.reader import SerialReader
 from cli.monitor import handle_frame
 from cli.interact import repl
+from cli.setup import repl_setup
+from database.db import init_db
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["monitor", "interact"])
+    ap.add_argument("mode", choices=["monitor", "interact", "setup"])
     ap.add_argument("-p", "--port", required=True)
     args = ap.parse_args()
 
@@ -18,7 +20,10 @@ def main():
     reader.start()
 
     if args.mode == "interact":
-        repl(transport)
+        init_db()
+        repl(transport, 1)
+    elif args.mode == "setup":
+        repl_setup(transport)
     else:
         try:
             while True:

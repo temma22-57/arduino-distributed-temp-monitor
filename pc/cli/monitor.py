@@ -14,12 +14,14 @@ def handle_frame(src, cmd, payload):
         temp = raw / 100.0
         
         print(f"[Node {src}] Temperature: {temp:.2f} Celcius")
+    
     elif cmd == 0x81 and len(payload) == 4:
         firmware_version = payload[0]
         config_version = payload[1]
         node_id = payload[2]
         interval = payload[3]
         print(f"[Node {src}] Firmware: v{firmware_version} Config: v{config_version} Interval: {interval}s")
+    
     elif cmd == 0xFF and len(payload) == 1:
         err_id = payload[0]
         err = "ERR"
