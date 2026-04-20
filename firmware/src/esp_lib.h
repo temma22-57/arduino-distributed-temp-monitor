@@ -8,6 +8,7 @@
 #ifndef ESP_LIB_H
 #define ESP_LIB_H
 
+#define MAX_PEERS 16
 
 void esp_now_write(const uint8_t *, size_t);
 void esp_now_set_broadcastAddress(uint8_t *);

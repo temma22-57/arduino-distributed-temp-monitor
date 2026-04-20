@@ -9,6 +9,11 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
+static esp_now_peer_info_t host;
+static esp_npw_peer_info_t nodes[MAX_PEERS];
+static uint8_t peers;
+
+
 static uint8_t broadcastAddress[6];
 
 void esp_now_write(const uint8_t *data, size_t len){
@@ -80,7 +85,8 @@ void esp_now_setup_node(uint8_t *host_mac){
 
   esp_now_set_broadcastAddress(host_mac);
 
-  esp_now_peer_info_t host;
+  peers = MAX_PEERS;
+  
   memcpy(host.peer_addr, host_mac, 6);
   host.channel = 0;
   host.encrypt = false;
@@ -107,17 +113,23 @@ void esp_now_setup_host(){
   esp_now_register_recv_cb(onDataRecvHost);
   esp_now_register_send_cb(onDataSentHost);
 
+  peers = 0;
+
   uint8_t code = SUCCESS_ESP_SETUP;
   protocol_send(CMD_SUCCESS, &code, 1);
 }
 
-void add_node_to_host(uint8_t *mac){ 
-  esp_now_peer_info_t new_peer;
-  memcpy(new_peer.peer_addr, mac, 6);
-  new_peer.channel = 0;
-  new_peer.encrypt = false;
+void add_node_to_host(uint8_t *mac){
+	if(peers >= MAX_PEERS){
+		return;
+	}
 
-  esp_err_t add_host_err = esp_now_add_peer(&new_peer);
+  esp_now_peer_info_t *new_peer = (nodes + peers++);
+  memcpy(new_peer->peer_addr, mac, 6);
+  new_peer->channel = 0;
+  new_peer->encrypt = false;
+
+  esp_err_t add_host_err = esp_now_add_peer(new_peer);
   if(add_host_err == ESP_OK){
     uint8_t code = SUCCESS_ESP_ADD_NODE;
     protocol_send(CMD_SUCCESS, &code, 1);//send positive feedback

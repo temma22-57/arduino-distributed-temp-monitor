@@ -17,10 +17,10 @@ def repl(transport, host_id):
                 if node_id == host_id:
                     transport.write(build_frame(0x00, 0x01))
                 else:
-                    mac_address = get_mac_address(node_id).replace(":", "")
+                    mac_address = get_mac_address(node_id)
                     
-                    payload = bytes.fromhex(mac_address)
-                    payload = [payload, build_frame(0x00, 0x01)]
+                    mac_array = bytes([int(b, 16) for b in mac_address.split(':')])
+                    payload = mac_array + build_frame(0x00, 0x01)
                     transport.write(build_frame(0x00, 0x35, payload))
 
             elif cmd == "temp":
@@ -31,23 +31,23 @@ def repl(transport, host_id):
                 else:
                     mac_address = get_mac_address(node_id).replace(":", "")
                     
-                    payload = bytes.fromhex(mac_address)
-                    payload = [payload, build_frame(0x00, 0x10)]
-                    transport.write(build_frame(0x00, 0x35, payload))
+                    payload1 = bytes.fromhex(mac_address)
+                    payload2 = [payload1, build_frame(0x00, 0x10)]
+                    transport.write(build_frame(0x00, 0x35, payload2))
 
             elif cmd == "set_interval":
                 node_id = int(line[1])
                 sec = int(line[2])
-                internal_payload = bytes([sec >> 8) & 0xFF, sec & 0xFF])
+                internal_payload = bytes([(sec >> 8) & 0xFF, sec & 0xFF])
                 
                 if node_id == host_id:
                     transport.write(build_frame(0x00, 0x20, internal_payload))
                 else:
                     mac_address = get_mac_address(node_id).replace(":", "")
                     
-                    payload = bytes.fromhex(mac_address)
-                    payload = [payload, build_frame(0x00, 0x20, internal_payload)]
-                    transport.write(build_frame(0x00, 0x35, payload))
+                    payload1 = bytes.fromhex(mac_address)
+                    payload2 = [payload1, build_frame(0x00, 0x20, internal_payload)]
+                    transport.write(build_frame(0x00, 0x35, payload2))
 
             elif cmd == "mac":
                 node_id = int(line[1])
@@ -57,13 +57,13 @@ def repl(transport, host_id):
                 else:
                     mac_address = get_mac_address(node_id).replace(":", "")
                     
-                    payload = bytes.fromhex(mac_address)
-                    payload = [payload, build_frame(0x00, 0x15)]
-                    transport.write(build_frame(0x00, 0x35, payload))
+                    payload1 = bytes.fromhex(mac_address)
+                    payload2 = [payload1, build_frame(0x00, 0x15)]
+                    transport.write(build_frame(0x00, 0x35, payload2))
 
             elif cmd == "list_nodes":
                 devices = list_all_devices()
-                print("| ID |    Mac Address    | Name "
+                print("| ID |    Mac Address    | Name ")
                 for node_id, mac, name in devices:
                     print(f"|  {node_id} | {mac} | {name}")
 
